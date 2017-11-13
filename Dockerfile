@@ -3,7 +3,8 @@
 #
 
 FROM ubuntu
-
+RUN echo $(whoami)
+ADD . .
 # Add the PostgreSQL PGP key to verify their Debian packages.
 # It should be the same key as https://www.postgresql.org/media/keys/ACCC4CF8.asc
 RUN apt-key adv --keyserver hkp://p80.pool.sks-keyservers.net:80 --recv-keys B97B0AFCAA1A47F044F244A07FCC7D46ACCC4CF8
@@ -45,5 +46,16 @@ RUN    /etc/init.d/postgresql start &&\
         # Add VOLUMEs to allow backup of config, logs and databases
         VOLUME  ["/etc/postgresql", "/var/log/postgresql", "/var/lib/postgresql"]
 
+USER root
+
+RUN apt-get update
+RUN apt-get install -y python 
+RUN apt-get install -y python-pip
+ 
+# Install app dependencies
+RUN pip install --upgrade pip
+RUN pip install psycopg2
+
+RUN echo "root:root" | chpasswd
 # Set the default command to run when starting the container
-CMD ["/usr/lib/postgresql/9.3/bin/postgres", "-D", "/var/lib/postgresql/9.3/main", "-c", "config_file=/etc/postgresql/9.3/main/postgresql.conf"]
+CMD bash execute.sh
